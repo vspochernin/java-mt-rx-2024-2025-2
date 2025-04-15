@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 public class FilteredObserver<T> implements Observer<T> {
+
     private final Observer<T> observer;
     private final Predicate<T> predicate;
     private final AtomicBoolean disposed;

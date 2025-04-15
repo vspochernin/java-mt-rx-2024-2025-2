@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class MappedObserver<T, R> implements Observer<T> {
+
     private final Observer<R> observer;
     private final Function<T, R> mapper;
     private final AtomicBoolean disposed;

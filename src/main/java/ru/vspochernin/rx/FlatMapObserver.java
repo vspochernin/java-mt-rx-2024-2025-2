@@ -5,13 +5,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class FlatMapObserver<T, R> implements Observer<T> {
+
     private final Observer<R> observer;
     private final Function<? super T, ? extends Observable<? extends R>> mapper;
     private final AtomicBoolean disposed;
     private final AtomicBoolean hasError;
     private final AtomicInteger activeCount;
 
-    public FlatMapObserver(Observer<R> observer, Function<? super T, ? extends Observable<? extends R>> mapper, AtomicBoolean disposed) {
+    public FlatMapObserver(Observer<R> observer, Function<? super T, ? extends Observable<? extends R>> mapper,
+            AtomicBoolean disposed)
+    {
         this.observer = observer;
         this.mapper = mapper;
         this.disposed = disposed;

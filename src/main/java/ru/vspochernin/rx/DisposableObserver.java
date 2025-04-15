@@ -3,6 +3,7 @@ package ru.vspochernin.rx;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DisposableObserver<T> implements Observer<T> {
+
     private final Observer<T> observer;
     private final AtomicBoolean disposed;
 
