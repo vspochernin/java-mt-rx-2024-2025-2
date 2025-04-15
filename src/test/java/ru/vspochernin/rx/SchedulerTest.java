@@ -88,4 +88,26 @@ class SchedulerTest {
         assertEquals(List.of(1, 2, 3), observer.getItems());
         assertTrue(observer.isCompleted());
     }
+
+    @Test
+    void testSingleThreadScheduler() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        DefaultObserver<Integer> observer = new DefaultObserver<>();
+
+        Observable<Integer> observable = Observable.create(obs -> {
+            obs.onNext(1);
+            obs.onNext(2);
+            obs.onNext(3);
+            obs.onComplete();
+            latch.countDown();
+        });
+
+        observable
+                .subscribeOn(SingleThreadScheduler.getInstance())
+                .subscribe(observer);
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+        assertEquals(List.of(1, 2, 3), observer.getItems());
+        assertTrue(observer.isCompleted());
+    }
 } 
