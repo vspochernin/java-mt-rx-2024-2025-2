@@ -52,23 +52,7 @@ class SchedulerTest {
 
         observable
                 .observeOn(ComputationScheduler.getInstance())
-                .subscribe(new Observer<>() {
-                    @Override
-                    public void onNext(Integer item) {
-                        threadId.set((int) Thread.currentThread().threadId());
-                        observer.onNext(item);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        observer.onError(t);
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        observer.onComplete();
-                    }
-                });
+                .subscribe(observer);
 
         assertTrue(latch.await(1, TimeUnit.SECONDS));
         assertNotEquals(Thread.currentThread().threadId(), threadId.get());
@@ -95,23 +79,7 @@ class SchedulerTest {
         observable
                 .subscribeOn(IOThreadScheduler.getInstance())
                 .observeOn(ComputationScheduler.getInstance())
-                .subscribe(new Observer<>() {
-                    @Override
-                    public void onNext(Integer item) {
-                        observeThreadId.set((int) Thread.currentThread().threadId());
-                        observer.onNext(item);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        observer.onError(t);
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        observer.onComplete();
-                    }
-                });
+                .subscribe(observer);
 
         assertTrue(latch.await(1, TimeUnit.SECONDS));
         assertNotEquals(Thread.currentThread().threadId(), subscribeThreadId.get());
