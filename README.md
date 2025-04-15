@@ -108,7 +108,7 @@ Observable<Integer> observable = Observable.create(obs -> {
 DefaultObserver<Integer> observer = new DefaultObserver<>();
 observable.subscribe(observer);
 
-// Получение результатов
+// Получение результатов.
 List<Integer> items = observer.getItems();
 Throwable error = observer.getError();
 boolean completed = observer.isCompleted();
@@ -129,7 +129,7 @@ source
     .map(x -> "Even: " + x)
     .subscribe(observer);
 
-// Получение результатов
+// Получение результатов.
 List<String> items = observer.getItems();
 ```
 
@@ -148,6 +148,6 @@ source
     .observeOn(ComputationScheduler.getInstance())
     .subscribe(observer);
 
-// Получение результатов
+// Получение результатов.
 List<Integer> items = observer.getItems();
 ```
