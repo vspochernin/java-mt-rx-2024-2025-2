@@ -1,11 +1,13 @@
 package ru.vspochernin.rx;
 
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ObservableTest {
+
     @Test
     void testBasicObservable() {
         DefaultObserver<Integer> observer = new DefaultObserver<>();
@@ -53,8 +55,8 @@ class ObservableTest {
         });
 
         observable
-            .map(i -> "Number: " + i)
-            .subscribe(observer);
+                .map(i -> "Number: " + i)
+                .subscribe(observer);
 
         assertEquals(List.of("Number: 1", "Number: 2", "Number: 3"), observer.getItems());
         assertNull(observer.getError());
@@ -75,8 +77,8 @@ class ObservableTest {
         });
 
         observable
-            .filter(i -> i % 2 == 0)
-            .subscribe(observer);
+                .filter(i -> i % 2 == 0)
+                .subscribe(observer);
 
         assertEquals(List.of(2, 4), observer.getItems());
         assertNull(observer.getError());
@@ -97,9 +99,9 @@ class ObservableTest {
         });
 
         observable
-            .filter(i -> i % 2 == 0)
-            .map(i -> "Even: " + i)
-            .subscribe(observer);
+                .filter(i -> i % 2 == 0)
+                .map(i -> "Even: " + i)
+                .subscribe(observer);
 
         assertEquals(List.of("Even: 2", "Even: 4"), observer.getItems());
         assertNull(observer.getError());

@@ -1,7 +1,9 @@
 package ru.vspochernin.rx;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DisposableTest {
@@ -18,7 +20,7 @@ class DisposableTest {
         assertTrue(disposable.isDisposed());
         assertTrue(disposed.get());
 
-        // Повторный вызов dispose не должен вызывать действие снова
+        // Повторный вызов dispose не должен вызывать действие снова.
         disposable.dispose();
         assertTrue(disposable.isDisposed());
     }
@@ -41,7 +43,7 @@ class DisposableTest {
         Disposable disposable = observable.subscribe(observer);
         assertFalse(disposable.isDisposed());
 
-        // Ждем, пока дойдем до 5
+        // Ждем, пока дойдем до 5.
         while (!completed.get()) {
             Thread.yield();
         }
@@ -49,7 +51,7 @@ class DisposableTest {
         disposable.dispose();
         assertTrue(disposable.isDisposed());
 
-        // Проверяем, что получили все числа
+        // Проверяем, что получили все числа.
         assertEquals(1000, observer.getItems().size());
     }
 } 

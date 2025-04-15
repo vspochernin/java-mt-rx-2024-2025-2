@@ -1,10 +1,13 @@
 package ru.vspochernin.rx;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.List;
 
 class FlatMapTest {
+
     @Test
     void testFlatMap() {
         DefaultObserver<String> observer = new DefaultObserver<>();
@@ -15,7 +18,7 @@ class FlatMapTest {
             obs.onComplete();
         });
 
-        Observable<String> result = source.flatMap(i -> Observable.<String>create(obs -> {
+        Observable<String> result = source.flatMap(i -> Observable.create(obs -> {
             obs.onNext("Value: " + i);
             obs.onNext("Double: " + (i * 2));
             obs.onComplete();
@@ -23,10 +26,7 @@ class FlatMapTest {
 
         result.subscribe(observer);
 
-        assertEquals(
-            List.of("Value: 1", "Double: 2", "Value: 2", "Double: 4"),
-            observer.getItems()
-        );
+        assertEquals(List.of("Value: 1", "Double: 2", "Value: 2", "Double: 4"), observer.getItems());
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
     }
@@ -46,7 +46,7 @@ class FlatMapTest {
             if (i == 2) {
                 throw error;
             }
-            return Observable.<String>create(obs -> {
+            return Observable.create(obs -> {
                 obs.onNext("Value: " + i);
                 obs.onComplete();
             });
@@ -70,7 +70,7 @@ class FlatMapTest {
             obs.onComplete();
         });
 
-        Observable<String> result = source.flatMap(i -> Observable.<String>create(obs -> {
+        Observable<String> result = source.flatMap(i -> Observable.create(obs -> {
             if (i == 2) {
                 throw error;
             }
