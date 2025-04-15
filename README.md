@@ -16,6 +16,8 @@
   - `onError(Throwable t)` - обработка ошибок.
   - `onComplete()` - обработка завершения потока.
 
+- **DefaultObserver** - базовая реализация `Observer`, которая хранит полученные элементы, ошибки и состояние завершения.
+
 - **Observable** - основной класс, представляющий источник данных:
   - Статический метод `create()` для создания Observable.
   - Метод `subscribe()` для подписки на события.
@@ -103,26 +105,16 @@ Observable<Integer> observable = Observable.create(obs -> {
     obs.onComplete();
 });
 
-observable.subscribe(new Observer<Integer>() {
-    @Override
-    public void onNext(Integer item) {
-        System.out.println(item);
-    }
+DefaultObserver<Integer> observer = new DefaultObserver<>();
+observable.subscribe(observer);
 
-    @Override
-    public void onError(Throwable t) {
-        t.printStackTrace();
-    }
-
-    @Override
-    public void onComplete() {
-        System.out.println("Done");
-    }
-});
+// Получение результатов
+List<Integer> items = observer.getItems();
+Throwable error = observer.getError();
+boolean completed = observer.isCompleted();
 ```
 
 ### Использование операторов
-
 ```java
 Observable<Integer> source = Observable.create(obs -> {
     obs.onNext(1);
@@ -131,14 +123,17 @@ Observable<Integer> source = Observable.create(obs -> {
     obs.onComplete();
 });
 
+DefaultObserver<String> observer = new DefaultObserver<>();
 source
     .filter(x -> x % 2 == 0)
-    .map(x -> x * 2)
-    .subscribe(System.out::println);
+    .map(x -> "Even: " + x)
+    .subscribe(observer);
+
+// Получение результатов
+List<String> items = observer.getItems();
 ```
 
 ### Использование Schedulers
-
 ```java
 Observable<Integer> source = Observable.create(obs -> {
     obs.onNext(1);
@@ -147,8 +142,12 @@ Observable<Integer> source = Observable.create(obs -> {
     obs.onComplete();
 });
 
+DefaultObserver<Integer> observer = new DefaultObserver<>();
 source
     .subscribeOn(IOThreadScheduler.getInstance())
     .observeOn(ComputationScheduler.getInstance())
-    .subscribe(System.out::println);
+    .subscribe(observer);
+
+// Получение результатов
+List<Integer> items = observer.getItems();
 ```

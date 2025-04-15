@@ -1,7 +1,6 @@
 package ru.vspochernin.rx;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -20,28 +19,7 @@ public class Observable<T> {
 
     public Disposable subscribe(Observer<T> observer) {
         AtomicBoolean disposed = new AtomicBoolean(false);
-        Observer<T> disposableObserver = new Observer<>() {
-            @Override
-            public void onNext(T item) {
-                if (!disposed.get()) {
-                    observer.onNext(item);
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                if (!disposed.get()) {
-                    observer.onError(t);
-                }
-            }
-
-            @Override
-            public void onComplete() {
-                if (!disposed.get()) {
-                    observer.onComplete();
-                }
-            }
-        };
+        Observer<T> disposableObserver = new DisposableObserver<>(observer, disposed);
 
         try {
             source.accept(disposableObserver);
@@ -59,28 +37,7 @@ public class Observable<T> {
             AtomicBoolean disposed = new AtomicBoolean(false);
             scheduler.execute(() -> {
                 if (!disposed.get()) {
-                    subscribe(new Observer<>() {
-                        @Override
-                        public void onNext(T item) {
-                            if (!disposed.get()) {
-                                observer.onNext(item);
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            if (!disposed.get()) {
-                                observer.onError(t);
-                            }
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            if (!disposed.get()) {
-                                observer.onComplete();
-                            }
-                        }
-                    });
+                    subscribe(new DisposableObserver<>(observer, disposed));
                 }
             });
         });
@@ -89,171 +46,28 @@ public class Observable<T> {
     public Observable<T> observeOn(Scheduler scheduler) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            subscribe(new Observer<>() {
-                @Override
-                public void onNext(T item) {
-                    if (!disposed.get()) {
-                        scheduler.execute(() -> {
-                            if (!disposed.get()) {
-                                observer.onNext(item);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    if (!disposed.get()) {
-                        scheduler.execute(() -> {
-                            if (!disposed.get()) {
-                                observer.onError(t);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (!disposed.get()) {
-                        scheduler.execute(() -> {
-                            if (!disposed.get()) {
-                                observer.onComplete();
-                            }
-                        });
-                    }
-                }
-            });
+            subscribe(new ScheduledObserver<>(observer, scheduler, disposed));
         });
     }
 
     public <R> Observable<R> map(Function<T, R> mapper) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            subscribe(new Observer<>() {
-                @Override
-                public void onNext(T item) {
-                    if (!disposed.get()) {
-                        try {
-                            observer.onNext(mapper.apply(item));
-                        } catch (Throwable t) {
-                            observer.onError(t);
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    if (!disposed.get()) {
-                        observer.onError(t);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (!disposed.get()) {
-                        observer.onComplete();
-                    }
-                }
-            });
+            subscribe(new MappedObserver<>(observer, mapper, disposed));
         });
     }
 
     public Observable<T> filter(Predicate<T> predicate) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            subscribe(new Observer<T>() {
-                @Override
-                public void onNext(T item) {
-                    if (!disposed.get()) {
-                        try {
-                            if (predicate.test(item)) {
-                                observer.onNext(item);
-                            }
-                        } catch (Throwable t) {
-                            observer.onError(t);
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    if (!disposed.get()) {
-                        observer.onError(t);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (!disposed.get()) {
-                        observer.onComplete();
-                    }
-                }
-            });
+            subscribe(new FilteredObserver<>(observer, predicate, disposed));
         });
     }
 
     public <R> Observable<R> flatMap(Function<? super T, ? extends Observable<? extends R>> mapper) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            AtomicBoolean hasError = new AtomicBoolean(false);
-            AtomicInteger activeCount = new AtomicInteger(1);
-
-            Observer<T> sourceObserver = new Observer<T>() {
-                @Override
-                public void onNext(T item) {
-                    if (!disposed.get() && !hasError.get()) {
-                        try {
-                            Observable<? extends R> innerObservable = mapper.apply(item);
-                            activeCount.incrementAndGet();
-
-                            Observer<R> innerObserver = new Observer<R>() {
-                                @Override
-                                public void onNext(R innerItem) {
-                                    if (!disposed.get() && !hasError.get()) {
-                                        observer.onNext(innerItem);
-                                    }
-                                }
-
-                                @Override
-                                public void onError(Throwable t) {
-                                    if (hasError.compareAndSet(false, true) && !disposed.get()) {
-                                        observer.onError(t);
-                                    }
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                    if (activeCount.decrementAndGet() == 0 && !hasError.get() && !disposed.get()) {
-                                        observer.onComplete();
-                                    }
-                                }
-                            };
-
-                            ((Observable<R>) innerObservable).subscribe(innerObserver);
-                        } catch (Throwable t) {
-                            if (hasError.compareAndSet(false, true) && !disposed.get()) {
-                                observer.onError(t);
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    if (hasError.compareAndSet(false, true) && !disposed.get()) {
-                        observer.onError(t);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (activeCount.decrementAndGet() == 0 && !hasError.get() && !disposed.get()) {
-                        observer.onComplete();
-                    }
-                }
-            };
-
-            subscribe(sourceObserver);
+            subscribe(new FlatMapObserver<>(observer, mapper, disposed));
         });
     }
 } 
