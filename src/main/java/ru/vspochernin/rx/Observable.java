@@ -23,6 +23,33 @@ public class Observable<T> {
         }
     }
 
+    public Observable<T> subscribeOn(Scheduler scheduler) {
+        return new Observable<>(observer -> 
+            scheduler.execute(() -> subscribe(observer))
+        );
+    }
+
+    public Observable<T> observeOn(Scheduler scheduler) {
+        return new Observable<>(observer ->
+            subscribe(new Observer<T>() {
+                @Override
+                public void onNext(T item) {
+                    scheduler.execute(() -> observer.onNext(item));
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    scheduler.execute(() -> observer.onError(t));
+                }
+
+                @Override
+                public void onComplete() {
+                    scheduler.execute(observer::onComplete);
+                }
+            })
+        );
+    }
+
     public <R> Observable<R> map(Function<T, R> mapper) {
         return new Observable<>(observer -> 
             subscribe(new Observer<T>() {
