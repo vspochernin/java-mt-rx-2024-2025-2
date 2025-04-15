@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultObserver<T> implements Observer<T> {
+
     private final List<T> items = new ArrayList<>();
     private Throwable error;
     private boolean completed;

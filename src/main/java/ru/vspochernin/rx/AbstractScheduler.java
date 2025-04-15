@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractScheduler implements Scheduler {
+
     protected final ExecutorService executor;
 
     protected AbstractScheduler(ExecutorService executor) {

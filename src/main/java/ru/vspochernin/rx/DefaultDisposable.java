@@ -3,6 +3,7 @@ package ru.vspochernin.rx;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultDisposable implements Disposable {
+
     private final AtomicBoolean disposed;
 
     public DefaultDisposable(AtomicBoolean disposed) {

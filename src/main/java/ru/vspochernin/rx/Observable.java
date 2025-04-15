@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class Observable<T> {
+
     private final Consumer<Observer<T>> source;
 
     private Observable(Consumer<Observer<T>> source) {
@@ -19,7 +20,7 @@ public class Observable<T> {
 
     public Disposable subscribe(Observer<T> observer) {
         AtomicBoolean disposed = new AtomicBoolean(false);
-        Observer<T> disposableObserver = new Observer<T>() {
+        Observer<T> disposableObserver = new Observer<>() {
             @Override
             public void onNext(T item) {
                 if (!disposed.get()) {
@@ -58,7 +59,7 @@ public class Observable<T> {
             AtomicBoolean disposed = new AtomicBoolean(false);
             scheduler.execute(() -> {
                 if (!disposed.get()) {
-                    subscribe(new Observer<T>() {
+                    subscribe(new Observer<>() {
                         @Override
                         public void onNext(T item) {
                             if (!disposed.get()) {
@@ -88,7 +89,7 @@ public class Observable<T> {
     public Observable<T> observeOn(Scheduler scheduler) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            subscribe(new Observer<T>() {
+            subscribe(new Observer<>() {
                 @Override
                 public void onNext(T item) {
                     if (!disposed.get()) {
@@ -128,7 +129,7 @@ public class Observable<T> {
     public <R> Observable<R> map(Function<T, R> mapper) {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
-            subscribe(new Observer<T>() {
+            subscribe(new Observer<>() {
                 @Override
                 public void onNext(T item) {
                     if (!disposed.get()) {
@@ -195,7 +196,7 @@ public class Observable<T> {
         return new Observable<>(observer -> {
             AtomicBoolean disposed = new AtomicBoolean(false);
             AtomicBoolean hasError = new AtomicBoolean(false);
-            AtomicInteger activeCount = new AtomicInteger(1); // 1 for source Observable
+            AtomicInteger activeCount = new AtomicInteger(1);
 
             Observer<T> sourceObserver = new Observer<T>() {
                 @Override
